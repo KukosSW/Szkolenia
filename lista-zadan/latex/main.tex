@@ -1,0 +1,164 @@
+\documentclass[12]{article}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{listings}
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\usepackage[most]{tcolorbox}
+\usepackage{amsfonts}
+\usepackage{tcolorbox}
+
+% Page format
+\usepackage[headheight=18pt, top=25mm, bottom=25mm, left=25mm, right=25mm]{geometry}
+
+% \href \cite colors
+\usepackage[colorlinks=true, linkcolor=black, filecolor=black, citecolor=black, urlcolor=blue]{hyperref}
+
+% Cites (Sosrates )
+\usepackage{epigraph}
+
+% Workaround for \ceil and \floor
+\usepackage{mathtools}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+% \includegraphics
+\usepackage{graphicx}
+\graphicspath{{./Rysunki}}
+
+% To use workarund below
+\usepackage[english]{isodate}
+
+% C lang style
+\lstloadlanguages{C}
+
+\lstdefinestyle{C99}
+{
+	language=C,
+ 	basicstyle=\ttfamily,
+	keywordstyle=\color{blue}\ttfamily,
+	stringstyle=\color{red}\ttfamily,
+	commentstyle=\color{OliveGreen}\ttfamily,
+	numbers=left,
+	stepnumber=1,
+	firstnumber=1,
+    numberfirstline=true,
+    numbersep=10pt,
+	breaklines=true,
+	breakautoindent=false,
+	breakatwhitespace=false,
+	%postbreak=\space,
+	tabsize=2,
+	frame=single,
+	linewidth=15cm,
+	xleftmargin=0.5cm,
+	showspaces=false,
+	showstringspaces=false,
+	extendedchars=true,
+	backgroundcolor=\color{white},
+	%postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+ 	morekeywords={size_t, ssize_t, uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t, restrict, inline, typeof, sizeof, ptrdiff_t, __attribute__}
+ }
+ 
+% Makefile lang style
+\lstloadlanguages{make}
+
+\lstdefinestyle{mymake}
+{
+	language=make,
+ 	basicstyle=\ttfamily,
+	keywordstyle=\color{blue}\ttfamily,
+	stringstyle=\color{red}\ttfamily,
+	commentstyle=\color{OliveGreen}\ttfamily,
+	numbers=left,
+	stepnumber=1,
+	firstnumber=1,
+    numberfirstline=true,
+    numbersep=10pt,
+	breaklines=true,
+	breakautoindent=false,
+	breakatwhitespace=false,
+	%postbreak=\space,
+	tabsize=2,
+	frame=single,
+	linewidth=15cm,
+	xleftmargin=0.5cm,
+	showspaces=false,
+	showstringspaces=false,
+	extendedchars=true,
+	backgroundcolor=\color{white},
+	%postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+ 	morekeywords={call, \$, @, wildcard, define, endef, ifeq, endif, shell, ifndef, else, <}
+ }
+
+% Promela lang style 
+\lstloadlanguages{Promela}
+
+\lstdefinestyle{myPromela}
+{
+	language=Promela,
+ 	basicstyle=\ttfamily,
+	keywordstyle=\color{blue}\ttfamily,
+	stringstyle=\color{red}\ttfamily,
+	commentstyle=\color{OliveGreen}\ttfamily,
+	numbers=left,
+	stepnumber=1,
+	firstnumber=1,
+    numberfirstline=true,
+    numbersep=10pt,
+	breaklines=true,
+	breakautoindent=false,
+	breakatwhitespace=false,
+	%postbreak=\space,
+	tabsize=2,
+	frame=single,
+	linewidth=15cm,
+	xleftmargin=0.5cm,
+	showspaces=false,
+	showstringspaces=false,
+	extendedchars=true,
+	backgroundcolor=\color{white},
+	%postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+ 	morekeywords={}
+ }
+ 
+\tcbuselibrary{theorems, breakable, skins}
+\newtcbtheorem{exercise}{Zadanie}%
+{ % frame stuff
+    standard jigsaw,
+    breakable,
+    enhanced,
+    colback=white!5,
+    colframe=blue,
+    %left=0.2cm,
+    % title stuff
+    attach boxed title to top left={yshift=-2mm,xshift=-2mm},
+    coltitle=black,
+    fonttitle=\bfseries,
+    colbacktitle=white!5,
+    boxed title style={boxrule=1.2pt,sharp corners}
+}{exercise}
+
+\title{Knowledge Sharing - zadania}
+\author{Michał Kukowski}
+
+
+\date{\printdayoff\today}
+
+\begin{document}
+
+% Workaournd for polish isodate
+\def\today{\ifcase\month\or
+  Styczeń\or Luty\or Marzec\or Kwiecień\or Maj\or Czerwiec\or
+  Lipiec\or Sierpień\or Wrzesień\or Październik\or Listopad\or Grudzień\fi
+  \space \number\year}
+
+\maketitle
+
+\input{wstep.tex}
+\clearpage
+
+\input{zadania.tex}
+\clearpage
+
+\input{dodatek.tex}
+\end{document}

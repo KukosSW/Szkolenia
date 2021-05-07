@@ -1,0 +1,26 @@
+\epigraph{Nie mogę nikogo niczego nauczyć. \\ Mogę tylko sprawić, że zaczną myśleć.}{\textit{Sokrates}}
+\section{Wprowadzenie}
+
+Ten dokument zawiera listę zadań (podobną do tych, które można spotkać na studiach), które zostały uznane za wartościowe i takie, które polepszą umiejętności programistyczne.
+
+\textbf{Zadania podzielone są na 3 kategorie:}
+\begin{itemize}
+    \item \textbf{inżynierskie} - polegają na zaimplementowaniu małej części systemu np. alokatora. Są to zadania najbliższe temu co robimy w pracy.
+    \item \textbf{eksperymentalne} - polegają na zaimplementowaniu kilku różnych wariantów danego algorytmu lub systemu, a następnie przeprowadzenia eksperymentów pokazujących wady i zalety wykorzystanych metod.
+    \item \textbf{algorytmiczne} - polegają na rozwiązaniu zadania tekstowego skrywającego podstawowy problem informatyczny, np. Vertex Cover.
+    %\item \textbf{optymalizacyjne} - polegają na rozwiązaniu problemu optymalizującego przy użyciu wybranego solvera LP, IP, MiP np glpsol.
+\end{itemize}
+
+%Zadanie powinno zostać rozwiązane samodzielnie, bez ingerencji pozostałych członków zespołu. W momencie podjęcia się zadania, osoba w dokumencie zespołu wpisuje przy zadaniu swoje imię oraz status: $claimed$. \\
+%\textbf{UWAGA: Jedna osoba może mieć tylko 1 zadanie w statusie $claimed$}.
+
+\textbf{Rozwiązanie zadania powinno zawierać następujące elementy:}
+\begin{itemize}
+    \item \textbf{Opis problemu} - należy przedstawić problemy (informatyki) jakie należy rozwiązać aby uzyskać działające rozwiązanie zadania. Np: Alokator - fragmentacja, bin packing problem. Głównie tyczy się to zadań algorytmicznych.
+    \item \textbf{Kod źródłowy} - należy udostępnić wszystkim swój kod źródłowy i krótko go omówić na prezentacji zadania. Projekt powinien zawierać czytelną strukturę plików i katalogów, a także automatyczny system budowania: make, cmake.
+    Przykładowy Makefile można znaleźć w dodatku \ref{dodatek:makefile}.
+    \item \textbf{Działający przykład} - autor implementacji powinien przygotować przykład, który odpali przy wszystkich podczas prezentacji. Wyjątkiem są eksperymenty, które czasami trzeba przeprowadzić offline. Wtedy przykład możemy sobie darować.
+    \item \textbf{Schemat działania} - podczas prezentacji należy przedstawić schemat działania wybranego algorytmu, najlepiej wykonać na sucho (bez kodu) swój algorytm na wybranym przykładzie. Ten punkt najlepiej wykonać w formie prezentacji i rysunków.
+    \item \textbf{Benchmarki} - jeśli zadanie prosi o eksperymenty należy przygotować i udostępnić kod do przeprowadzania eksperymentów i generowania wyników. Tak aby każdy mógł pobawić się implementacją i sprawdzić wpływ zmian na zachowanie się algorytmu. Wyniki eksperymentów mogą być przedstawione w formie wydruku na konsoli lub wykresów. Spróbuj napisać skrypt do generowania wykresów. Możesz użyć do tego dowolnego języka jak python czy julia lub narzędzia gnuplot.
+    Do zmierzenia czasu wykonywania się kodu w języku C możesz użyć makra umieszczonego w dodatku \ref{dodatek:benchmark}.
+\end{itemize}

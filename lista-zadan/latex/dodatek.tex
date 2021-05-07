@@ -1,0 +1,254 @@
+\section{Dodatek}
+
+\subsection{Benchmark} \label{dodatek:benchmark}
+\begin{lstlisting}[language=C,style=C99]
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define CLOCK_TYPE CLOCK_MONOTONIC
+
+#define MEASURE_FUNCTION(func, label) \
+    do { \
+        struct timespec start; \
+        struct timespec end; \
+        double timeTaken; \
+        \
+        clock_gettime(CLOCK_TYPE, &start); \
+        (void)func; \
+        clock_gettime(CLOCK_TYPE, &end); \
+        \
+        timeTaken = (double)(end.tv_sec - start.tv_sec) * 1e9; \
+        timeTaken = (double)(timeTaken + (double)(end.tv_nsec - start.tv_nsec)) * 1e-9; \
+        \
+        printf(label " time = %lf[s]\n", timeTaken); \
+    } while (0)
+    
+extern int fib(int n);
+
+int main(void)
+{
+    MEASURE_FUNCTION(fib(45), "Fibonacci(45)");
+    
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Makefile} \label{dodatek:makefile}
+Zakładamy że posiadamy następującą strukturę katalogów:
+\begin{itemize}
+    \item \textbf{./} - katalog głowny projektu gdzie trzymamy plik Makefile, README oraz inne pliki konfiguracyjne.
+    \item \textbf{./src} - katalog zawierający kod źródłowy wszystkich plików prócz pliku zawierającego funkcję main.
+    \item \textbf{./app} - katalog zawierający kod źródłowy pliku z funkcją main.
+    \item \textbf{./inc} - katalog zawierający pliki nagłówkowe.
+\end{itemize}
+
+\clearpage
+Wtedy przykładowy plik Makefile może wyglądać następująco.
+
+\begin{lstlisting}[language=make, style=mymake]
+# Shell commands
+RM          := rm -rf
+
+# Compiler setting (default it will be gcc)
+CC          ?= gcc
+
+# Enable max optimization
+CC_OPT      := -O3
+
+# Maybe some flags are duplicated, but who cares
+CC_WARNINGS := -Wall -Wextra -pedantic -Wcast-align \
+               -Winit-self -Wmissing-include-dirs \
+               -Wredundant-decls -Wshadow -Wstrict-overflow=5 \
+               -Wundef -Wwrite-strings -Wpointer-arith \
+               -Wmissing-declarations -Wuninitialized \
+               -Wold-style-definition -Wstrict-prototypes \
+               -Wmissing-prototypes -Wswitch-default \
+               -Wbad-function-cast -Wnested-externs \
+               -Wconversion -Wunreachable-code \
+
+ifeq ($(CC),$(filter $(CC), gcc cc))
+CC_SYM      :=  -rdynamic
+CC_STD      :=  -std=gnu99
+else ifeq ($(CC),clang)
+CC_SYM      :=  -Wl,--export-dynamic
+CC_WARNINGS +=  -Wgnu -Weverything -Wno-newline-eof \
+                -Wno-unused-command-line-argument \
+                -Wno-reserved-id-macro -Wno-documentation \
+                -Wno-documentation-unknown-command \
+                -Wno-padded
+CC_STD      :=  -std=c99
+endif
+
+CC_FLAGS    := $(CC_STD) $(CC_WARNINGS) $(CC_OPT) $(CC_SYM)
+
+PROJECT_DIR := $(shell pwd)
+
+# To enable verbose mode type make V=1
+ifeq ("$(origin V)", "command line")
+  VERBOSE = $(V)
+endif
+
+ifndef VERBOSE
+  VERBOSE = 0
+endif
+
+ifeq ($(VERBOSE),1)
+  Q =
+else
+  Q = @
+endif
+
+define print_info
+	$(if $(Q), @echo "$(1)")
+endef
+
+define print_make
+	$(if $(Q), @echo "[MAKE]     $(1)")
+endef
+
+define print_cc
+	$(if $(Q), @echo "[CC]      $(1)")
+endef
+
+define print_bin
+	$(if $(Q), @echo "[BIN]     $(1)")
+endef
+
+
+IDIR := $(PROJECT_DIR)/inc
+SDIR := $(PROJECT_DIR)/src
+ADIR := $(PROJECT_DIR)/app
+
+SRCS := $(wildcard $(SDIR)/*.c) $(wildcard $(ADIR)/*.c)
+OBJS := $(SRCS:%.c=%.o)
+DEPS := $(wildcard $(IDIR)/*.h)
+
+# Put here all needed libraries like math, pthread etc
+LIBS := -lm
+
+# Type here name of your output file
+EXEC := $(PROJECT_DIR)/main.out
+
+all: $(EXEC)
+
+%.o: %.c
+	$(call print_cc, $<)
+	$(Q)$(CC) $(CC_FLAGS) -I$(IDIR) -c $< -o $@
+
+$(EXEC): $(OBJS)
+	$(call print_bin, $@)
+	$(Q)$(CC) $(CC_FLAGS) -I$(IDIR) $(OBJS) $(LIBS) -o $@
+
+clean:
+	$(call print_info,Cleaning)
+	$(Q)$(RM) $(OBJS)
+	$(Q)$(RM) $(EXEC)
+
+\end{lstlisting}
+\clearpage
+
+\subsection{Przykład weryfikatora jednowątkowego w języku promela} \label{dodatek:promelaST}
+Model implementuje proces, w którym losujemy zawsze 2 kule. Jeśli kule są tego samego koloru to dokładamy kulę czarną do puli, w przeciwnym razie dokładamy kule białą. \\
+Model ma za zadanie sprawdzić czy gdy zaczynamy z 150 kulami czarnymi i 75 kulami białymi to zawsze skończymy z jedną kulą białą? \\
+Prawdopodobieństwo wylosowania się kul jest jednostajne.
+\begin{lstlisting}[language=Promela,style=myPromela]
+/*
+    System:
+    We have 150 black balls and 75 white balls
+
+    Process:
+    Get 2 balls
+    if (balls have the same color)
+        add black ball to urn
+    else
+        add white ball to urn
+
+    CHECK:
+        Always at the end we have 1 white ball
+
+    Program:
+        Check assert at the end of process
+
+    Command:
+        spin -run urns.pml
+*/
+
+active proctype urns()
+{
+    int blacks = 150;
+    int whites = 75;
+    do
+    :: (blacks + whites > 1) ->
+        if
+        ::	(blacks >= 2) -> blacks--
+        ::	(whites >= 2) -> whites = whites - 2; blacks++
+        ::	(whites >= 1 && blacks >= 1) -> blacks--;
+        fi
+
+    :: else -> break;
+    od
+
+    assert(blacks == 0 && whites == 1);
+}
+\end{lstlisting}
+
+\clearpage
+
+\subsection{Przykład weryfikatora wielowątkowego w języku promela} \label{dodatek:promelaMT}
+
+\begin{lstlisting}[language=Promela,style=myPromela]
+/*
+    Algorithm: Dijkstra's Mutual exclusion
+    CHECK:
+       1) Only 1 process can execute crit section code
+    Program:
+       1) Never Claim is used. This will check assert in every step of program
+    Command:
+        spin -T -u10000 -g mutual_exclusion.pml
+*/
+#define N 8
+int values[N]
+chan msg[N] = [0] of {int}
+int crit = 0
+#define START_JOB() crit = crit + 1;
+#define END_JOB() crit = crit - 1
+
+active proctype thread_first()
+{
+    int val
+    int id = _pid
+    assert(id == 0)
+    do
+    ::  msg[id] ? val ; if
+                        :: (val == values[id]) -> START_JOB(); values[id] = (values[id] + 1) % (N + 1) ; END_JOB();
+                        :: else -> skip
+                        fi
+    ::  msg[id + 1] ! values[id]
+    od
+}
+
+active[N - 1] proctype thread()
+{
+    int val
+    int id = _pid
+    assert(id > 0 && id < N)
+    do
+    :: msg[id] ? val ;  if
+                        :: (val != values[id]) -> START_JOB(); values[id] = val ; END_JOB();
+                        :: else -> skip
+                        fi
+    :: msg[(id + 1) % N] ! values[id]
+    od
+}
+never
+{
+   do
+   :: assert(crit <= 1)
+   od
+}
+\end{lstlisting}
+
+Powyższy model sprawdza algorytm wykluczania się opracowany przez \href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.93.314&rep=rep1&type=pdf}{Dijkstre}. Algorytm ten zawiera dodatkowo piękną własność samostabilizacji, czyli jeśli kiedyś przypadkowo (np. przez bitflip) dojdzie do błędu w systemie. Czyli do sytuacji, w której więcej niż 1 wątek będzie korzystał z sekcji krytycznej to w skończonej liczbie kroków algorytm sam się naprawi i dalej będzie bronił sekcji krytycznej. \\
+Jego schemat działania jest bardzo prosty. Ustawiamy wątki w pierścień według ich $id$. Zamieniamy wtedy ich $id$ na liczby porządkowe, tak aby sąsiad z prawej miał większe $id$ tylko o 1, a sąsiad z lewej mniejsze o 1. \\
+Wyróżniamy 2 rodzaje wątków, wątek pierwszy i pozostałe. Wątek pierwszy rusza się wtedy i tylko wtedy gdy wątek ostatni posiada taką samą wartość $val$. Zwiększa on wtedy swoją wartość $val$ o 1. Pozostałe wątki ruszają się tylko gdy ich wartość $val$ jest różna od wartości $val$ poprzednika (lewego sąsiada). Wtedy po zakończeniu ruchu ustawiają $val$ na wartość swojego sąsiada.

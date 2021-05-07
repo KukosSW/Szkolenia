@@ -1,0 +1,173 @@
+\documentclass[xcolor={dvipsnames}]{beamer}
+\setbeamercovered{transparent}
+ 
+ \usepackage{listings}
+\usepackage{ucs}
+\usepackage[utf8x]{inputenc}
+\usepackage[polish]{babel}
+\usepackage{polski}
+\usepackage[T1]{fontenc}
+\usepackage{amsfonts}
+\usepackage{animate}
+\usepackage{amsmath}
+
+\usetheme{Madrid}
+\urlstyle{same}
+
+\setbeamercovered{invisible}
+
+\AtBeginSection[]{
+  \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+}
+
+\lstset{
+  	literate=	{ą}{{\k a}}1
+  		     	{Ą}{{\k A}}1
+           		{ż}{{\. z}}1
+          	 	{Ż}{{\. Z}}1
+           		{ź}{{\' z}}1
+           		{Ź}{{\' Z}}1
+           		{ć}{{\' c}}1
+           		{Ć}{{\' C}}1
+           		{ę}{{\k e}}1
+           		{Ę}{{\k E}}1
+           		{ó}{{\' o}}1
+           		{Ó}{{\' O}}1
+           		{ń}{{\' n}}1
+           		{Ń}{{\' N}}1
+           		{ś}{{\' s}}1
+           		{Ś}{{\' S}}1
+           		{ł}{{\l}}1
+           		{Ł}{{\L}}1
+}
+
+% C lang style
+\lstloadlanguages{C}
+
+\lstdefinestyle{C99}
+{
+	language=C,
+ 	basicstyle=\ttfamily,
+	keywordstyle=\color{blue}\ttfamily,
+	stringstyle=\color{red}\ttfamily,
+	commentstyle=\color{OliveGreen}\ttfamily,
+	numbers=left,
+	stepnumber=1,
+	firstnumber=1,
+    numberfirstline=true,
+    numbersep=10pt,
+	breaklines=true,
+	breakautoindent=false,
+	breakatwhitespace=false,
+	%postbreak=\space,
+	tabsize=2,
+	frame=single,
+	linewidth=12cm,
+	xleftmargin=0.5cm,
+	showspaces=false,
+	showstringspaces=false,
+	extendedchars=true,
+	backgroundcolor=\color{white},
+	%postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+ 	morekeywords={size_t, ssize_t, uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t, restrict, inline, typeof, sizeof, ptrdiff_t, __attribute__}
+ }
+ 
+ % Wiekszy font do autora
+ \setbeamerfont{author}{size=\fontsize{18pt}{20pt}}
+ 
+\author{Michal Kukowski}
+\title[Optymalizacja - mnożenie macierzy]{Mnożenie macierzy}
+\date{} % bez daty
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\begin{frame}{Mnożenie macierzy}
+\LARGE
+	\[
+		A = \begin{pmatrix}
+			a_{11} & a_{12} & a_{13} \\
+			a_{21} & a_{22} & a_{23} \\
+			a_{31} & a_{32} & a_{33}
+		\end{pmatrix}
+		\quad
+		B = \begin{pmatrix}
+			b_{11} & b_{12} \\
+			b_{21} & b_{22}  \\
+			b_{31} & b_{32} 
+		\end{pmatrix}
+	\]
+	\vspace{0.3cm}
+	\[
+		C = A \times B = \quad
+		\begin{pmatrix}
+			c_{11} & c_{12} \\
+			c_{21} & c_{22}  \\
+			c_{31} & c_{32} 
+		\end{pmatrix}
+	\]
+\end{frame}
+
+\begin{frame}{Wierszowo - kolumnowe mnożenie}
+\LARGE
+	\begin{block}{}
+		To podejście jest najszęściej stosowane. W szkole uczą nas tego mnożenia macierzy, ponieważ w jednym kroku (używając jednego równania), możemy obliczyć każdy element $c_{ij}$.
+		Stosujemy wzór:
+		\[ c_{ij}=\displaystyle\sum_{k=1}^n a_{ik} * b_{kj} \]
+	\end{block}
+\end{frame}
+
+\begin{frame}{Liczymy}
+	\LARGE
+	\[
+		A = \begin{pmatrix}
+			a_{11} & a_{12} & a_{13} \\
+			a_{21} & a_{22} & a_{23} \\
+			a_{31} & a_{32} & a_{33}
+		\end{pmatrix}
+		\quad
+		B = \begin{pmatrix}
+			b_{11} & b_{12} \\
+			b_{21} & b_{22}  \\
+			b_{31} & b_{32} 
+		\end{pmatrix}
+	\]
+	\vspace{0.3cm}
+	\[  c_{11} = a_{11} * b_{11} +  a_{12} * b_{21} + a_{13} * b_{31}  \]
+	\[  c_{12} = a_{11} * b_{12} +  a_{12} * b_{22} + a_{13} * b_{32}  \]
+\end{frame}
+
+\begin{frame}{Wierszowo - wierszowe mnożenie}
+\LARGE
+	\[  c_{11} = a_{11} * b_{11} +  a_{12} * b_{21} + a_{13} * b_{31}  \]
+	\[  c_{12} = a_{11} * b_{12} +  a_{12} * b_{22} + a_{13} * b_{32}  \]
+	Rozpiszmy to inaczej:
+	\[  c_{11} = 0 + a_{11} * b_{11} \qquad c_{12} = 0 + a_{11} * b_{12} \]
+	\[  c_{11} = c_{11} +  a_{12} * b_{21} \qquad  c_{12} = c_{12} + a_{12} * b_{22} \]
+	\[  c_{11} = c_{11} +  a_{13} * b_{31} \qquad  c_{12} = c_{12} + a_{13} * b_{32} \]
+\end{frame}
+
+\begin{frame}{Wierszowo - wierszowe mnożenie}
+	\Large
+	\begin{block}{}
+		\begin{itemize}
+			\item W jedym ruchu liczymy tylko część wyniku (pola $c_{ij}$)
+			\item Pętla wewnętrzna leci po $j$, czyli $i$ stałe, $j$ zmienne
+			\item Podczas liczenia elemetów $c$, element macierzy $A$ jest stały (wewnętrzna pętla)
+			\item Przechodzenie każdej macierzy jest po drugim wymiarze, czyli tak jak układa się pamięć (cache-friendly)
+			\item Odwołujemy się wiele razy to elementu macierzy $C$
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+\end{document}
